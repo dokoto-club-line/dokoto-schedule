@@ -1020,37 +1020,43 @@ css
   }
 
   
-    // GASから開催日程を取得
-    const eventScheduleScript = document.createElement("script");
+    
+  // GASから開催日程を取得
+  const eventScheduleScript = document.createElement("script");
 
-    const eventScheduleCallbackName =
-      "eventScheduleCallback_" + Date.now();
+  const eventScheduleCallbackName =
+    "eventScheduleCallback_" + Date.now();
 
-    window[eventScheduleCallbackName] = function(data) {
-      try {
-        loadEventSchedule(data);
-      } finally {
-        delete window[eventScheduleCallbackName];
+  window[eventScheduleCallbackName] = function(data) {
+    try {
+      loadEventSchedule(data);
+    } catch (error) {
+      console.error("開催日程の表示エラー:", error);
 
-        if (eventScheduleScript.parentNode) {
-          eventScheduleScript.parentNode.removeChild(eventScheduleScript);
-        }
-      }
-    };
-
-    eventScheduleScript.src =
-      GAS_API_URL +
-      "?mode=eventSchedule&callback=" +
-      encodeURIComponent(eventScheduleCallbackName);
-
-    eventScheduleScript.onerror = function() {
       document.getElementById("eventScheduleList").innerHTML =
-        '<div style="text-align:center;padding:20px;">開催日程を取得できませんでした。</div>';
-
+        '<div style="text-align:center;padding:20px;">開催日程の表示に失敗しました。</div>';
+    } finally {
       delete window[eventScheduleCallbackName];
-    };
 
-    document.body.appendChild(eventScheduleScript);
+      if (eventScheduleScript.parentNode) {
+        eventScheduleScript.parentNode.removeChild(eventScheduleScript);
+      }
+    }
+  };
+
+  eventScheduleScript.src =
+    "https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec" +
+    "?mode=eventSchedule&callback=" +
+    encodeURIComponent(eventScheduleCallbackName);
+
+  eventScheduleScript.onerror = function() {
+    document.getElementById("eventScheduleList").innerHTML =
+      '<div style="text-align:center;padding:20px;">開催日程を取得できませんでした。</div>';
+
+    delete window[eventScheduleCallbackName];
+  };
+
+  document.body.appendChild(eventScheduleScript);
 
 </script>
 
