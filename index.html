@@ -724,11 +724,17 @@ css
     <span>開催日程</span>
   </div>
 
-  <div id="eventScheduleList">
-    <div style="text-align:center; padding:20px;">
-      開催日程を読み込んでいます...
-    </div>
-  </div>
+  
+<div id="eventScheduleList">
+  <img
+    id="eventScheduleImage"
+    src=""
+    alt="開催日程"
+    style="display:block;width:100%;height:auto;cursor:pointer;"
+  >
+  <div id="eventScheduleDots" style="text-align:center;padding:10px 0;"></div>
+</div>
+
 
   <div class="tap-message">
     🔍 開催日程画像をタップすると拡大してご覧いただけます（再度タップすると元の画面に戻ります）
@@ -962,6 +968,7 @@ css
 </script> 
 
 <script>
+ 
   // 開催日程を取得
   function loadEventSchedule(data) {
     const list = document.getElementById("eventScheduleList");
@@ -977,39 +984,95 @@ css
       return;
     }
 
-    list.innerHTML = "";
+    const schedules = data.schedules;
+    let currentIndex = 0;
+    let startX = 0;
 
-    data.schedules.forEach(function(item) {
-      const card = document.createElement("div");
-      card.className = "event-schedule-card";
+    list.innerHTML = `
+      <div class="event-schedule-card">
+        <div class="event-schedule-label" id="eventScheduleLabel"></div>
+        <img
+          id="eventScheduleImage"
+          class="event-schedule-image"
+          alt="開催日程"
+          style="cursor:pointer;"
+        >
+        <div
+          id="eventScheduleDots"
+          style="text-align:center;padding:10px 0;"
+        ></div>
+      </div>
+    `;
 
-      const label = document.createElement("div");
-      label.className = "event-schedule-label";
-      label.textContent = item.title;
+    const image = document.getElementById("eventScheduleImage");
+    const label = document.getElementById("eventScheduleLabel");
+    const dots = document.getElementById("eventScheduleDots");
 
-      const image = document.createElement("img");
-      image.className = "event-schedule-image";
+    function showSchedule(index) {
+      currentIndex = index;
+      const item = schedules[currentIndex];
+
       image.src = item.imageUrl;
       image.alt = item.title + " 開催日程";
-      image.loading = "lazy";
+      label.textContent = item.title;
 
-      image.addEventListener("click", function() {
-        openEventScheduleImage(item.imageUrl, item.title);
+      dots.innerHTML = "";
+
+      schedules.forEach(function(schedule, i) {
+        const dot = document.createElement("button");
+
+        dot.type = "button";
+        dot.textContent = i === currentIndex ? "●" : "○";
+        dot.setAttribute("aria-label", schedule.title + "を表示");
+        dot.style.cssText =
+          "border:0;background:transparent;font-size:16px;" +
+          "margin:0 5px;cursor:pointer;color:" +
+          (i === currentIndex ? "#333" : "#aaa");
+
+        dot.addEventListener("click", function() {
+          showSchedule(i);
+        });
+
+        dots.appendChild(dot);
       });
+    }
 
-      card.appendChild(label);
-      card.appendChild(image);
-      list.appendChild(card);
+    // 画像をタップして拡大
+    image.addEventListener("click", function() {
+      openEventScheduleImage(
+        schedules[currentIndex].imageUrl,
+        schedules[currentIndex].title
+      );
     });
+
+    // 左右スワイプで切り替え
+    image.addEventListener("touchstart", function(e) {
+      startX = e.touches[0].clientX;
+    }, { passive: true });
+
+    image.addEventListener("touchend", function(e) {
+      const difference = e.changedTouches[0].clientX - startX;
+
+      if (Math.abs(difference) > 50) {
+        const nextIndex =
+          difference < 0
+            ? (currentIndex + 1) % schedules.length
+            : (currentIndex - 1 + schedules.length) % schedules.length;
+
+        showSchedule(nextIndex);
+      }
+    }, { passive: true });
+
+    showSchedule(0);
   }
 
   // 拡大表示
   function openEventScheduleImage(url, title) {
     const modal = document.getElementById("eventScheduleModal");
-    const image = modal.querySelector("img");
+    const modalImage = modal.querySelector("img");
 
-    image.src = url;
-    image.alt = title + " 開催日程";
+    modalImage.src = url;
+    modalImage.alt = title + " 開催日程";
     modal.classList.add("show");
   }
 
@@ -1019,8 +1082,6 @@ css
       .classList.remove("show");
   }
 
-  
-    
   // GASから開催日程を取得
   const eventScheduleScript = document.createElement("script");
 
@@ -1068,8 +1129,6 @@ css
 >
   <img src="" alt="開催日程の拡大画像">
 </div>
-
-
   
 </body>
 </html>
