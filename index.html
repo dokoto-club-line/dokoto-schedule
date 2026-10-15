@@ -1023,7 +1023,8 @@
   const eventScheduleScript = document.createElement("script");
 
   eventScheduleScript.src =
-    "https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec?mode=eventSchedule&callback=loadEventSchedule";
+  GAS_API_URL +
+  "?mode=eventSchedule&callback=loadEventSchedule";
 
   document.body.appendChild(eventScheduleScript);
 </script>
