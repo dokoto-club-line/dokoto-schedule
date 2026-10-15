@@ -495,6 +495,42 @@
   font-size: 22px;
   color: #1976d2;
 }
+
+```css
+/* 開催日程 */
+.event-schedule-section {
+  background: #f5fbff;
+}
+
+.event-schedule-title {
+  color: #075ca8;
+}
+
+.event-schedule-card {
+  margin: 0 12px 14px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #d9e5ed;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.event-schedule-label {
+  margin: 4px 0 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #075ca8;
+}
+
+.event-schedule-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  cursor: pointer;
+}
+```
+    
   </style>
 </head>
 
@@ -680,6 +716,27 @@
 
 </section>
 
+ ```html
+<!-- 開催日程 -->
+<section class="section event-schedule-section">
+
+  <div class="section-title event-schedule-title">
+    <span class="icon">📅</span>
+    <span>開催日程</span>
+  </div>
+
+  <div id="eventScheduleList">
+    <div style="text-align:center; padding:20px;">
+      開催日程を読み込んでいます...
+    </div>
+  </div>
+
+  <div class="tap-message">
+    🔍 画像をタップすると拡大してご覧いただけます
+  </div>
+
+</section>
+```   
 
     <!-- お知らせ -->
     <section class="section news-section">
@@ -904,6 +961,85 @@
     document.getElementById("scheduleModal").classList.remove("show");
   }
 </script> 
- 
+
+```html
+<script>
+  // 開催日程を取得
+  function loadEventSchedule(data) {
+    const list = document.getElementById("eventScheduleList");
+
+    if (
+      !data ||
+      !data.success ||
+      !Array.isArray(data.schedules) ||
+      data.schedules.length === 0
+    ) {
+      list.innerHTML =
+        '<div style="text-align:center;padding:20px;">開催日程を取得できませんでした。</div>';
+      return;
+    }
+
+    list.innerHTML = "";
+
+    data.schedules.forEach(function(item) {
+      const card = document.createElement("div");
+      card.className = "event-schedule-card";
+
+      const label = document.createElement("div");
+      label.className = "event-schedule-label";
+      label.textContent = item.title;
+
+      const image = document.createElement("img");
+      image.className = "event-schedule-image";
+      image.src = item.imageUrl;
+      image.alt = item.title + " 開催日程";
+      image.loading = "lazy";
+
+      image.addEventListener("click", function() {
+        openEventScheduleImage(item.imageUrl, item.title);
+      });
+
+      card.appendChild(label);
+      card.appendChild(image);
+      list.appendChild(card);
+    });
+  }
+
+  // 拡大表示
+  function openEventScheduleImage(url, title) {
+    const modal = document.getElementById("eventScheduleModal");
+    const image = modal.querySelector("img");
+
+    image.src = url;
+    image.alt = title + " 開催日程";
+    modal.classList.add("show");
+  }
+
+  function closeEventScheduleImage() {
+    document
+      .getElementById("eventScheduleModal")
+      .classList.remove("show");
+  }
+
+  // GASから開催日程を取得
+  const eventScheduleScript = document.createElement("script");
+
+  eventScheduleScript.src =
+    "https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec?mode=eventSchedule&callback=loadEventSchedule";
+
+  document.body.appendChild(eventScheduleScript);
+</script>
+
+<!-- 開催日程の拡大表示 -->
+<div
+  id="eventScheduleModal"
+  class="image-modal"
+  onclick="closeEventScheduleImage()"
+>
+  <img src="" alt="開催日程の拡大画像">
+</div>
+```
+
+  
 </body>
 </html>
