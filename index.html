@@ -687,36 +687,12 @@ css
   }
 
 
-  
-const scheduleScript = document.createElement("script");
-const scheduleCallbackName = "loadSchedules_" + Date.now();
+  const scheduleScript = document.createElement("script");
 
-window[scheduleCallbackName] = function(data) {
-  try {
-    loadSchedules(data);
-  } catch (error) {
-    console.error("開催スケジュールの表示エラー:", error);
-  } finally {
-    delete window[scheduleCallbackName];
-    if (scheduleScript.parentNode) {
-      scheduleScript.parentNode.removeChild(scheduleScript);
-    }
-  }
-};
+  scheduleScript.src =
+    "https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec?mode=schedules&callback=loadSchedules";
 
-scheduleScript.src =
-  "https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec" +
-  "?mode=schedules&callback=" +
-  encodeURIComponent(scheduleCallbackName) +
-  "&_=" + Date.now();
-
-scheduleScript.onerror = function() {
-  console.error("開催スケジュールを取得できませんでした。");
-  delete window[scheduleCallbackName];
-};
-
-document.body.appendChild(scheduleScript);
-
+  document.body.appendChild(scheduleScript);
 
 </script>
     </section>
@@ -896,36 +872,10 @@ document.body.appendChild(scheduleScript);
 
   const campaignScript = document.createElement("script");
 
+ campaignScript.src =
+"https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec?mode=campaigns&callback=loadCampaigns";
 
-const campaignScript = document.createElement("script");
-const campaignCallbackName = "loadCampaigns_" + Date.now();
-
-window[campaignCallbackName] = function(data) {
-  try {
-    loadCampaigns(data);
-  } catch (error) {
-    console.error("キャンペーンの表示エラー:", error);
-  } finally {
-    delete window[campaignCallbackName];
-    if (campaignScript.parentNode) {
-      campaignScript.parentNode.removeChild(campaignScript);
-    }
-  }
-};
-
-campaignScript.src =
-  "https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec" +
-  "?mode=campaigns&callback=" +
-  encodeURIComponent(campaignCallbackName) +
-  "&_=" + Date.now();
-
-campaignScript.onerror = function() {
-  console.error("キャンペーンを取得できませんでした。");
-  delete window[campaignCallbackName];
-};
-
-document.body.appendChild(campaignScript);
-
+  document.body.appendChild(campaignScript);
 </script>
 
       
@@ -1155,13 +1105,10 @@ document.body.appendChild(campaignScript);
     }
   };
 
-  
-eventScheduleScript.src =
+  eventScheduleScript.src =
   "https://script.google.com/macros/s/AKfycbz3A6MRxrE4JU6XyVww5scPSxQlXtDyP01h4YPit2Q3S-kJHC2JRQY-2IE8hCWOcySS/exec" +
   "?mode=eventSchedule&callback=" +
-  encodeURIComponent(eventScheduleCallbackName) +
-  "&_=" + Date.now();
-
+  encodeURIComponent(eventScheduleCallbackName);
 
   eventScheduleScript.onerror = function() {
     document.getElementById("eventScheduleList").innerHTML =
