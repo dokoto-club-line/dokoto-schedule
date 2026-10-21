@@ -580,120 +580,44 @@ css
 </section>
 
 <script>
+(function () {
+  const schedules = [
+    { targetMonth: "2026/10", imageUrl: "https://raw.githubusercontent.com/dokoto-club-line/dokoto-schedule/refs/heads/main/10%E6%9C%88%E9%96%8B%E5%82%AC%E3%82%B9%E3%82%B1%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AB.png" },
+    { targetMonth: "2026/11", imageUrl: "https://raw.githubusercontent.com/dokoto-club-line/dokoto-schedule/refs/heads/main/11%E6%9C%88%E9%96%8B%E5%82%AC%E3%82%B9%E3%82%B1%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AB.png" }
+  ];
+  const image = document.getElementById("scheduleImage");
+  const month = document.getElementById("scheduleMonth");
+  const dots = document.getElementById("scheduleDots");
+  let currentIndex = 0;
+  let startX = 0;
 
-  function loadSchedules(data) {
-
-    if (
-      !data ||
-      !data.success ||
-      !data.schedules ||
-      data.schedules.length === 0
-    ) {
-      return;
-    }
-
-    const schedules = data.schedules;
-
-    const image = document.getElementById("scheduleImage");
-    const month = document.getElementById("scheduleMonth");
-    const dots = document.getElementById("scheduleDots");
-
-    let currentIndex = 0;
-    let startX = 0;
-    let endX = 0;
-
-    function showSchedule(index) {
-
-      currentIndex = index;
-
-      image.src = schedules[currentIndex].imageUrl;
-
-      const targetMonth = schedules[currentIndex].targetMonth;
-
-      month.textContent =
-        targetMonth.replace("/", "年") + "月";
-
-      dots.innerHTML = "";
-
-      if (schedules.length > 1) {
-
-        schedules.forEach(function(item, index) {
-
-          const dot = document.createElement("span");
-
-          dot.textContent =
-            index === currentIndex ? "●" : "○";
-
-          dot.style.fontSize = "14px";
-          dot.style.margin = "0 4px";
-          dot.style.cursor = "pointer";
-
-          dot.addEventListener("click", function() {
-            showSchedule(index);
-          });
-
-          dots.appendChild(dot);
-        });
-      }
-
-      // 拡大表示用画像も現在の画像に合わせる
-      const modalImage =
-        document.querySelector("#scheduleModal img");
-
-      if (modalImage) {
-        modalImage.src = schedules[currentIndex].imageUrl;
-        modalImage.alt =
-          targetMonth + " DOKOTOクラブ キャンペーンスケジュール";
-      }
-    }
-
-    // 初期表示
-    showSchedule(0);
-
-    // 左右スワイプ
-    image.addEventListener("touchstart", function(e) {
-      startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    image.addEventListener("touchend", function(e) {
-
-      endX = e.changedTouches[0].clientX;
-
-      const difference = endX - startX;
-
-      if (difference < -50) {
-
-        currentIndex++;
-
-        if (currentIndex >= schedules.length) {
-          currentIndex = 0;
-        }
-
-        showSchedule(currentIndex);
-      }
-
-      if (difference > 50) {
-
-        currentIndex--;
-
-        if (currentIndex < 0) {
-          currentIndex = schedules.length - 1;
-        }
-
-        showSchedule(currentIndex);
-      }
-
-    }, { passive: true });
+  function showSchedule(index) {
+    currentIndex = index;
+    const item = schedules[index];
+    image.src = item.imageUrl;
+    image.alt = item.targetMonth.replace("/", "年") + "月 開催スケジュール";
+    month.textContent = item.targetMonth.replace("/", "年") + "月";
+    const modalImage = document.querySelector("#scheduleModal img");
+    if (modalImage) { modalImage.src = item.imageUrl; modalImage.alt = item.targetMonth + " 開催スケジュール"; }
+    dots.innerHTML = "";
+    schedules.forEach(function (schedule, i) {
+      const dot = document.createElement("span");
+      dot.textContent = i === index ? "●" : "○";
+      dot.style.fontSize = "14px";
+      dot.style.margin = "0 4px";
+      dot.style.cursor = "pointer";
+      dot.addEventListener("click", function () { showSchedule(i); });
+      dots.appendChild(dot);
+    });
   }
-
-
-  const scheduleScript = document.createElement("script");
-
-  scheduleScript.src =
-    "https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec?mode=schedules&callback=loadSchedules";
-
-  document.body.appendChild(scheduleScript);
-
+  image.addEventListener("touchstart", function (e) { startX = e.touches[0].clientX; }, { passive: true });
+  image.addEventListener("touchend", function (e) {
+    const diff = e.changedTouches[0].clientX - startX;
+    if (diff < -50) showSchedule((currentIndex + 1) % schedules.length);
+    if (diff > 50) showSchedule((currentIndex - 1 + schedules.length) % schedules.length);
+  }, { passive: true });
+  showSchedule(0);
+})();
 </script>
     </section>
 
@@ -759,123 +683,28 @@ css
 
 
 <script>
-  function loadCampaigns(data) {
+(function () {
+  const campaignList = document.getElementById("campaignList");
+  const card = document.createElement("div");
+  card.className = "campaign-card";
+  card.style.position = "relative";
+  card.style.overflow = "hidden";
 
-    const campaignList = document.getElementById("campaignList");
+  const image = document.createElement("img");
+  image.src = "https://raw.githubusercontent.com/dokoto-club-line/dokoto-schedule/refs/heads/main/10%E6%9C%88%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%9A%E3%83%BC%E3%83%B3.png";
+  image.alt = "10月キャンペーン";
+  image.style.display = "block";
+  image.style.width = "100%";
+  image.style.height = "auto";
+  image.style.borderRadius = "8px";
+  image.onerror = function () {
+    campaignList.innerHTML = '<div class="campaign-card">キャンペーン画像を読み込めませんでした。GitHubの画像ファイル名を確認してください。</div>';
+  };
 
-    if (!data || !data.success || !data.campaigns || data.campaigns.length === 0) {
-      campaignList.innerHTML = "";
-      return;
-    }
-
-    const campaigns = data.campaigns;
-
-    // キャンペーンカード
-    const card = document.createElement("div");
-    card.className = "campaign-card";
-    card.style.position = "relative";
-    card.style.overflow = "hidden";
-
-    // 画像
-    const image = document.createElement("img");
-    image.src = campaigns[0].imageUrl;
-    image.alt = "キャンペーン";
-    image.style.display = "block";
-    image.style.width = "100%";
-    image.style.height = "auto";
-    image.style.borderRadius = "8px";
-    image.style.transition = "opacity 0.2s ease";
-
-    card.appendChild(image);
-
-    // 2件以上ある場合だけ切り替え機能を追加
-    if (campaigns.length > 1) {
-
-      let currentIndex = 0;
-      let startX = 0;
-      let endX = 0;
-
-      // ドット表示
-      const dots = document.createElement("div");
-      dots.style.textAlign = "center";
-      dots.style.padding = "8px 0 2px";
-
-      campaigns.forEach(function(item, index) {
-
-        const dot = document.createElement("span");
-
-        dot.textContent = index === 0 ? "●" : "○";
-        dot.style.fontSize = "14px";
-        dot.style.margin = "0 4px";
-        dot.style.cursor = "pointer";
-
-        dot.addEventListener("click", function() {
-          currentIndex = index;
-          image.src = campaigns[currentIndex].imageUrl;
-
-          const allDots = dots.querySelectorAll("span");
-
-          allDots.forEach(function(d, i) {
-            d.textContent = i === currentIndex ? "●" : "○";
-          });
-        });
-
-        dots.appendChild(dot);
-      });
-
-      // 左右スワイプ
-      image.addEventListener("touchstart", function(e) {
-        startX = e.touches[0].clientX;
-      }, { passive: true });
-
-      image.addEventListener("touchend", function(e) {
-
-        endX = e.changedTouches[0].clientX;
-
-        const difference = endX - startX;
-
-        // 左へスワイプ
-        if (difference < -50) {
-          currentIndex++;
-
-          if (currentIndex >= campaigns.length) {
-            currentIndex = 0;
-          }
-        }
-
-        // 右へスワイプ
-        if (difference > 50) {
-          currentIndex--;
-
-          if (currentIndex < 0) {
-            currentIndex = campaigns.length - 1;
-          }
-        }
-
-        image.src = campaigns[currentIndex].imageUrl;
-
-        const allDots = dots.querySelectorAll("span");
-
-        allDots.forEach(function(d, i) {
-          d.textContent = i === currentIndex ? "●" : "○";
-        });
-
-      }, { passive: true });
-
-      card.appendChild(dots);
-    }
-
-    campaignList.innerHTML = "";
-    campaignList.appendChild(card);
-  }
-
-
-  const campaignScript = document.createElement("script");
-
- campaignScript.src =
-"https://script.google.com/macros/s/AKfycby37uzZTlp5Os6xG_YosHm3NTG5Qx06EJEqgudnwT4j7IZT9WDNa46uwQdumfMKIYv3/exec?mode=campaigns&callback=loadCampaigns";
-
-  document.body.appendChild(campaignScript);
+  card.appendChild(image);
+  campaignList.innerHTML = "";
+  campaignList.appendChild(card);
+})();
 </script>
 
       
@@ -952,7 +781,7 @@ css
 
 <div id="scheduleModal" class="image-modal" onclick="closeScheduleImage()">
   <img
-    src="schedule-2026-09.png"
+    src="https://raw.githubusercontent.com/dokoto-club-line/dokoto-schedule/refs/heads/main/10%E6%9C%88%E9%96%8B%E5%82%AC%E3%82%B9%E3%82%B1%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AB.png"
     alt="2026年9月 DOKOTOクラブ キャンペーンスケジュール"
   >
 </div>
@@ -968,157 +797,43 @@ css
 </script> 
 
 <script>
- 
-  // 開催日程を取得
-  function loadEventSchedule(data) {
-    const list = document.getElementById("eventScheduleList");
-
-    if (
-      !data ||
-      !data.success ||
-      !Array.isArray(data.schedules) ||
-      data.schedules.length === 0
-    ) {
-      list.innerHTML =
-        '<div style="text-align:center;padding:20px;">開催日程を取得できませんでした。</div>';
-      return;
-    }
-
-    const schedules = data.schedules;
-    let currentIndex = 0;
-    let startX = 0;
-
-    list.innerHTML = `
-      <div class="event-schedule-card">
-        <div class="event-schedule-label" id="eventScheduleLabel"></div>
-        <img
-          id="eventScheduleImage"
-          class="event-schedule-image"
-          alt="開催日程"
-          style="cursor:pointer;"
-        >
-        <div
-          id="eventScheduleDots"
-          style="text-align:center;padding:10px 0;"
-        ></div>
-      </div>
-    `;
-
-    const image = document.getElementById("eventScheduleImage");
-    const label = document.getElementById("eventScheduleLabel");
-    const dots = document.getElementById("eventScheduleDots");
-
-    function showSchedule(index) {
-      currentIndex = index;
-      const item = schedules[currentIndex];
-
-      image.src = item.imageUrl;
-      image.alt = item.title + " 開催日程";
-      label.textContent = item.title;
-
-      dots.innerHTML = "";
-
-      schedules.forEach(function(schedule, i) {
-        const dot = document.createElement("button");
-
-        dot.type = "button";
-        dot.textContent = i === currentIndex ? "●" : "○";
-        dot.setAttribute("aria-label", schedule.title + "を表示");
-        dot.style.cssText =
-          "border:0;background:transparent;font-size:16px;" +
-          "margin:0 5px;cursor:pointer;color:" +
-          (i === currentIndex ? "#333" : "#aaa");
-
-        dot.addEventListener("click", function() {
-          showSchedule(i);
-        });
-
-        dots.appendChild(dot);
-      });
-    }
-
-    // 画像をタップして拡大
-    image.addEventListener("click", function() {
-      openEventScheduleImage(
-        schedules[currentIndex].imageUrl,
-        schedules[currentIndex].title
-      );
+(function () {
+  const schedules = [
+    { title: "10月～12月", imageUrl: "https://raw.githubusercontent.com/dokoto-club-line/dokoto-schedule/refs/heads/main/10%E6%9C%88-12%E6%9C%88.png" },
+    { title: "1月～3月", imageUrl: "https://raw.githubusercontent.com/dokoto-club-line/dokoto-schedule/refs/heads/main/1%E6%9C%88%EF%BD%9E3%E6%9C%88.png" }
+  ];
+  const list = document.getElementById("eventScheduleList");
+  let currentIndex = 0;
+  let startX = 0;
+  list.innerHTML = `<div class="event-schedule-card"><div class="event-schedule-label" id="eventScheduleLabel"></div><img id="eventScheduleImage" class="event-schedule-image" alt="開催日程" style="cursor:pointer;"><div id="eventScheduleDots" style="text-align:center;padding:10px 0;"></div></div>`;
+  const image = document.getElementById("eventScheduleImage");
+  const label = document.getElementById("eventScheduleLabel");
+  const dots = document.getElementById("eventScheduleDots");
+  function showSchedule(index) {
+    currentIndex = index;
+    const item = schedules[index];
+    image.src = item.imageUrl;
+    image.alt = item.title + " 開催日程";
+    label.textContent = item.title;
+    dots.innerHTML = "";
+    schedules.forEach(function (schedule, i) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.textContent = i === index ? "●" : "○";
+      dot.setAttribute("aria-label", schedule.title + "を表示");
+      dot.style.cssText = "border:0;background:transparent;font-size:16px;margin:0 5px;cursor:pointer;color:" + (i === index ? "#333" : "#aaa");
+      dot.addEventListener("click", function () { showSchedule(i); });
+      dots.appendChild(dot);
     });
-
-    // 左右スワイプで切り替え
-    image.addEventListener("touchstart", function(e) {
-      startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    image.addEventListener("touchend", function(e) {
-      const difference = e.changedTouches[0].clientX - startX;
-
-      if (Math.abs(difference) > 50) {
-        const nextIndex =
-          difference < 0
-            ? (currentIndex + 1) % schedules.length
-            : (currentIndex - 1 + schedules.length) % schedules.length;
-
-        showSchedule(nextIndex);
-      }
-    }, { passive: true });
-
-    showSchedule(0);
   }
-
-  // 拡大表示
-  function openEventScheduleImage(url, title) {
-    const modal = document.getElementById("eventScheduleModal");
-    const modalImage = modal.querySelector("img");
-
-    modalImage.src = url;
-    modalImage.alt = title + " 開催日程";
-    modal.classList.add("show");
-  }
-
-  function closeEventScheduleImage() {
-    document
-      .getElementById("eventScheduleModal")
-      .classList.remove("show");
-  }
-
-  // GASから開催日程を取得
-  const eventScheduleScript = document.createElement("script");
-
-  const eventScheduleCallbackName =
-    "eventScheduleCallback_" + Date.now();
-
-  window[eventScheduleCallbackName] = function(data) {
-    try {
-      loadEventSchedule(data);
-    } catch (error) {
-      console.error("開催日程の表示エラー:", error);
-
-      document.getElementById("eventScheduleList").innerHTML =
-        '<div style="text-align:center;padding:20px;">開催日程の表示に失敗しました。</div>';
-    } finally {
-      delete window[eventScheduleCallbackName];
-
-      if (eventScheduleScript.parentNode) {
-        eventScheduleScript.parentNode.removeChild(eventScheduleScript);
-      }
-    }
-  };
-
-  eventScheduleScript.src =
-  "https://script.google.com/macros/s/AKfycbz3A6MRxrE4JU6XyVww5scPSxQlXtDyP01h4YPit2Q3S-kJHC2JRQY-2IE8hCWOcySS/exec" +
-  "?mode=eventSchedule&callback=" +
-  encodeURIComponent(eventScheduleCallbackName);
-
-  eventScheduleScript.onerror = function() {
-    document.getElementById("eventScheduleList").innerHTML =
-      '<div style="text-align:center;padding:20px;">開催日程を取得できませんでした。</div>';
-
-    delete window[eventScheduleCallbackName];
-  };
-
-  document.body.appendChild(eventScheduleScript);
-
+  image.addEventListener("click", function () { openEventScheduleImage(schedules[currentIndex].imageUrl, schedules[currentIndex].title); });
+  image.addEventListener("touchstart", function (e) { startX = e.touches[0].clientX; }, { passive: true });
+  image.addEventListener("touchend", function (e) {
+    const diff = e.changedTouches[0].clientX - startX;
+    if (Math.abs(diff) > 50) showSchedule(diff < 0 ? (currentIndex + 1) % schedules.length : (currentIndex - 1 + schedules.length) % schedules.length);
+  }, { passive: true });
+  showSchedule(0);
+})();
 </script>
 
 <!-- 開催日程の拡大表示 -->
