@@ -836,6 +836,21 @@ css
 })();
 </script>
 
+<script>
+  // 開催日程画像の拡大・閉じる処理
+  function openEventScheduleImage(url, title) {
+    const modal = document.getElementById("eventScheduleModal");
+    const modalImage = modal.querySelector("img");
+    modalImage.src = url;
+    modalImage.alt = title + " 開催日程";
+    modal.classList.add("show");
+  }
+
+  function closeEventScheduleImage() {
+    document.getElementById("eventScheduleModal").classList.remove("show");
+  }
+</script>
+
 <!-- 開催日程の拡大表示 -->
 <div
   id="eventScheduleModal"
