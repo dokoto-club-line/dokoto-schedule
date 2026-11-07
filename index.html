@@ -683,29 +683,107 @@ css
   </div>
 </div>
 
-
+ <!-- キャンペーン画像箇所 -->
 <script>
 (function () {
   const campaignList = document.getElementById("campaignList");
-  const card = document.createElement("div");
-  card.className = "campaign-card";
-  card.style.position = "relative";
-  card.style.overflow = "hidden";
+
+  // =====================================
+  // キャンペーン画像 更新範囲
+  // 画像を追加・変更するときはここを編集
+  // =====================================
+  const campaignImages = [
+    "https://raw.githubusercontent.com/dokoto-club-line/dokoto-schedule/refs/heads/main/11%E6%9C%88%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%9A%E3%83%BC%E3%83%B3.png",
+    "画像2のURL",
+    "画像3のURL",
+    "画像4のURL"
+  ];
+
+  // =====================================
+  // スライド表示設定
+  // =====================================
+  let currentIndex = 0;
+
+  const slider = document.createElement("div");
+  slider.style.position = "relative";
+  slider.style.width = "100%";
+  slider.style.overflow = "hidden";
 
   const image = document.createElement("img");
-  image.src = "https://raw.githubusercontent.com/dokoto-club-line/dokoto-schedule/refs/heads/main/11%E6%9C%88%E3%82%AD%E3%83%A3%E3%83%B3%E3%83%9A%E3%83%BC%E3%83%B3.png";
-  image.alt = "11月キャンペーン";
+  image.src = campaignImages[0];
+  image.alt = "DOKOTOクラブ キャンペーン";
   image.style.display = "block";
   image.style.width = "100%";
   image.style.height = "auto";
   image.style.borderRadius = "8px";
-  image.onerror = function () {
-    campaignList.innerHTML = '<div class="campaign-card">キャンペーン画像を読み込めませんでした。GitHubの画像ファイル名を確認してください。</div>';
-  };
 
-  card.appendChild(image);
+  slider.appendChild(image);
+
+  // ドットナビゲーション
+  const dots = document.createElement("div");
+  dots.style.display = "flex";
+  dots.style.justifyContent = "center";
+  dots.style.alignItems = "center";
+  dots.style.gap = "10px";
+  dots.style.padding = "12px 0";
+
+  campaignImages.forEach(function (_, index) {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.style.width = "10px";
+    dot.style.height = "10px";
+    dot.style.padding = "0";
+    dot.style.border = "none";
+    dot.style.borderRadius = "50%";
+    dot.style.background = index === 0 ? "#1976d2" : "#ccc";
+    dot.style.cursor = "pointer";
+
+    dot.addEventListener("click", function () {
+      showImage(index);
+    });
+
+    dots.appendChild(dot);
+  });
+
+  // 画像切り替え
+  function showImage(index) {
+    currentIndex = index;
+    image.src = campaignImages[currentIndex];
+
+    Array.from(dots.children).forEach(function (dot, i) {
+      dot.style.background =
+        i === currentIndex ? "#1976d2" : "#ccc";
+    });
+  }
+
+  // 左右スワイプ対応
+  let touchStartX = 0;
+
+  slider.addEventListener("touchstart", function (e) {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+
+  slider.addEventListener("touchend", function (e) {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) < 50) return;
+
+    if (diff > 0) {
+      showImage((currentIndex + 1) % campaignImages.length);
+    } else {
+      showImage(
+        (currentIndex - 1 + campaignImages.length) %
+        campaignImages.length
+      );
+    }
+  }, { passive: true });
+
+  // 表示
   campaignList.innerHTML = "";
-  campaignList.appendChild(card);
+  campaignList.appendChild(slider);
+  campaignList.appendChild(dots);
+
 })();
 </script>
 
