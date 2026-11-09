@@ -879,12 +879,21 @@ css
 
  <script>
   function openScheduleImage() {
-    document.getElementById("scheduleModal").classList.add("show");
-  }
+  const modal = document.getElementById("scheduleModal");
+  const modalImage = modal.querySelector("img");
+  const scheduleImage = document.getElementById("scheduleImage");
 
-  function closeScheduleImage() {
-    document.getElementById("scheduleModal").classList.remove("show");
-  }
+  // 現在表示中の画像を拡大画面にセット
+  modalImage.src = scheduleImage.src;
+  modalImage.alt = scheduleImage.alt;
+
+  // 拡大画面を表示
+  modal.classList.add("show");
+}
+
+function closeScheduleImage() {
+  document.getElementById("scheduleModal").classList.remove("show");
+}
 </script> 
 
 <script>
